@@ -12,7 +12,6 @@ document.getElementById('uploadForm').addEventListener('submit', function (e) {
     .then((response) => response.text())
     .then((data) => {
       console.log(data);
-      alert('Image uploaded successfully!');
     })
     .catch((error) => {
       console.error('Error:', error);
