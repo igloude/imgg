@@ -9,11 +9,23 @@ document.getElementById('uploadForm').addEventListener('submit', function (e) {
     method: 'POST',
     body: formData,
   })
-    .then((response) => response.text())
-    .then((data) => {
-      console.log(data);
+    .then((response) => response.blob())
+    .then((blob) => {
+      var file = window.URL.createObjectURL(blob);
+
+      var a = document.createElement('a');
+      a.href = file;
+      a.download = 'download.zip';
+
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+
+      // delete the file from the server
+      fetch('/delete', {
+        method: 'POST',
+        body: formData,
+      });
     })
-    .catch((error) => {
-      console.error('Error:', error);
-    });
+    .catch((error) => console.error(error));
 });

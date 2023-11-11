@@ -1,5 +1,4 @@
 import fs from 'fs';
-import path from 'path';
 
 import express from 'express';
 import multer from 'multer';
@@ -10,6 +9,14 @@ const app = express();
 const upload = multer({ dest: 'uploads/' });
 
 const PORT = process.env.PORT || 8080;
+
+function deleteFile(filePath) {
+  fs.unlink(filePath, (err) => {
+    if (err) {
+      console.error(`Error deleting file ${filePath}:`, err);
+    }
+  });
+}
 
 app.use(express.static('public'));
 
@@ -81,6 +88,15 @@ app.post('/upload', upload.single('image'), async (req, res) => {
     name: name6,
   });
 
+  const cleanup = () => {
+    deleteFile(name1); // full size
+    deleteFile(name2); // 1920
+    deleteFile(name3); // 1280
+    deleteFile(name4); // 1024
+    deleteFile(name5); // 768
+    deleteFile(name6); // lr
+  };
+
   Promise.all(promises.map((p) => p.promise))
     .then((promiseRes) => {
       var archive = archiver('zip');
@@ -90,28 +106,39 @@ app.post('/upload', upload.single('image'), async (req, res) => {
 
       // add each file in promiseRes to the archive
       promiseRes.forEach((file, i) => {
-        archive.file(file, { name: promises[i].name });
+        let fileName = promises[i].name;
+        archive.file(fileName, { name: fileName });
       });
 
-      // finalize the archive
-      archive.finalize();
-
-      return archive;
+      // finalize the archive & cleanup
+      archive.finalize().then(() => {
+        cleanup();
+      });
     })
     .catch((err) => {
       console.error("Error processing files, let's clean it up", err);
       try {
-        fs.unlink(`${name}-1920.jpg`);
-        fs.unlink(`${name}-1280.jpeg`);
-        fs.unlink(`${name}-1024.jpeg`);
-        fs.unlink(`${name}-768.jpeg`);
-        fs.unlink(`${name}-lr.jpeg`);
+        cleanup();
       } catch (e) {
-        res.send('Error processing files');
+        console.error('Error cleaning up files', e);
       }
     });
+});
 
-  // cleanup
-  // fs.unlink(req.file.path);
-  return res;
+app.post('/delete', async (req, res) => {
+  const directory = 'uploads';
+
+  fs.readdir(directory, (err, files) => {
+    if (err) {
+      console.error(`Error reading directory ${directory}:`, err);
+      res.status(500).send('Error reading directory');
+      return;
+    }
+
+    files.forEach((file) => {
+      deleteFile(`uploads/${file}`);
+    });
+
+    res.send('Uploads directory cleaned');
+  });
 });
