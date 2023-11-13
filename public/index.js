@@ -98,14 +98,14 @@ app.post('/upload', upload.single('image'), async (req, res) => {
   };
 
   Promise.all(promises.map((p) => p.promise))
-    .then((promiseRes) => {
+    .then((promiseResponse) => {
       var archive = archiver('zip');
       archive.pipe(res);
 
       res.setHeader('Content-Disposition', 'attachment; filename=download.zip');
 
       // add each file in promiseRes to the archive
-      promiseRes.forEach((file, i) => {
+      promiseResponse.forEach((file, i) => {
         let fileName = promises[i].name;
         archive.file(fileName, { name: fileName });
       });
