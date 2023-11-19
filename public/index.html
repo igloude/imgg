@@ -7,7 +7,7 @@
 </head>
 <body>
     <form id="uploadForm" enctype="multipart/form-data">
-        <input type="file" name="image" required />
+        <input id="imageInput" type="file" name="image" accept="image/png, image/jpeg, image/jpg" required />
         <button type="submit">Upload Image</button>
     </form>
 
@@ -30,6 +30,7 @@
         </code>
     </pre>
 
+    <script src="handleFileInfo.js"></script>
     <script src="submit.js"></script>
 </body>
 </html>
