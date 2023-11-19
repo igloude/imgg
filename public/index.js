@@ -38,8 +38,6 @@ app.listen(PORT, () => {
 });
 
 app.post('/upload', upload.single('image'), async (req, res) => {
-  // req.file contains the uploaded image information
-  // You can now process this image and create different sizes
   const file = req.file.path;
   const name = req.file.originalname.split('.')[0];
   const promises = [];
@@ -133,7 +131,7 @@ app.post('/upload', upload.single('image'), async (req, res) => {
 });
 
 app.post('/delete', async (req, res) => {
-  // handle errors
+  // TODO: handle errors
   cleanup('uploads');
   res.status(200).send();
 });
