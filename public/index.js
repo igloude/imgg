@@ -18,6 +18,19 @@ function deleteFile(filePath) {
   });
 }
 
+function cleanup(dir) {
+  fs.readdir(dir, (err, files) => {
+    if (err) {
+      console.error(`Error reading directory ${directory}:`, err);
+      return;
+    }
+
+    files.forEach((file) => {
+      deleteFile(`uploads/${file}`);
+    });
+  });
+}
+
 app.use(express.static('public'));
 
 app.listen(PORT, () => {
@@ -31,6 +44,7 @@ app.post('/upload', upload.single('image'), async (req, res) => {
   const name = req.file.originalname.split('.')[0];
   const promises = [];
 
+  // TODO: abstract promises into a function
   const name1 = `${name}-full.jpeg`;
   promises.push({
     promise: sharp(file).clone().jpeg({ quality: 100 }).toFile(name1),
@@ -88,15 +102,6 @@ app.post('/upload', upload.single('image'), async (req, res) => {
     name: name6,
   });
 
-  const cleanup = () => {
-    deleteFile(name1); // full size
-    deleteFile(name2); // 1920
-    deleteFile(name3); // 1280
-    deleteFile(name4); // 1024
-    deleteFile(name5); // 768
-    deleteFile(name6); // lr
-  };
-
   Promise.all(promises.map((p) => p.promise))
     .then((promiseResponse) => {
       var archive = archiver('zip');
@@ -112,13 +117,15 @@ app.post('/upload', upload.single('image'), async (req, res) => {
 
       // finalize the archive & cleanup
       archive.finalize().then(() => {
-        cleanup();
+        promises.forEach((p) => {
+          deleteFile(p.name);
+        });
       });
     })
     .catch((err) => {
       console.error("Error processing files, let's clean it up", err);
       try {
-        cleanup();
+        cleanup('uploads');
       } catch (e) {
         console.error('Error cleaning up files', e);
       }
@@ -126,19 +133,7 @@ app.post('/upload', upload.single('image'), async (req, res) => {
 });
 
 app.post('/delete', async (req, res) => {
-  const directory = 'uploads';
-
-  fs.readdir(directory, (err, files) => {
-    if (err) {
-      console.error(`Error reading directory ${directory}:`, err);
-      res.status(500).send('Error reading directory');
-      return;
-    }
-
-    files.forEach((file) => {
-      deleteFile(`uploads/${file}`);
-    });
-
-    res.send('Uploads directory cleaned');
-  });
+  // handle errors
+  cleanup('uploads');
+  res.status(200).send();
 });
