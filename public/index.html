@@ -3,27 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://unpkg.com/htmx.org"></script>
     <title>IMGG</title>
 </head>
 <body>
+    {# TODO: when image is selected, swap views to select image breakpoints #}
     <form id="uploadForm" enctype="multipart/form-data">
         <input id="imageInput" type="file" name="image" accept="image/png, image/jpeg, image/jpg" required />
         <button type="submit">Upload Image</button>
     </form>
 
-    {# return FILENAME & sizes from request #}
-
-    {# download zip button #}
+    {# TODO: return FILENAME & sizes from request #}
 
     <pre>
         <code>
+            {# TODO: add srcset, sizes, and fallback low-res file paths #}
             &lt;img
                 srcset=""
                 sizes=""
                 src="image.jpg"
                 alt="My Image"
                 style="
-                    background: url('FILENAME-lr.jpg') no-repeat center center;
+                    background: url('FILENAME') no-repeat center center;
                     background-size: cover;
                 "
             /&gt;

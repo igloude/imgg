@@ -1,9 +1,17 @@
-document.getElementById('imageInput').addEventListener('change', function (e) {
-  console.log(e.target.files[0]);
-  // TODO: return image data: filename, extension, and file size
-  //    e.target.files[0]
+document
+  .getElementById('imageInput')
+  .addEventListener('change', handleFileSelect, false);
 
-  // TODO: return resolution using multer
+function handleFileSelect(e) {
+  const file = e.target.files[0];
 
-  // TODO: validate file size
-});
+  if (!file) {
+    console.log('No file selected.');
+    return;
+  }
+
+  // Basic File Information
+  console.log('File Name: ' + file.name);
+  console.log('File Size: ' + file.size + ' bytes');
+  console.log('File Type: ' + file.type);
+}
